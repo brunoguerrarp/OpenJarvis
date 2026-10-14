@@ -67,6 +67,10 @@ FROM python:3.12.13-slim-bookworm@sha256:76d4b7b6305788c6b4c6a19d6a22a3921bf802e
 
 COPY --from=builder /usr/local /usr/local
 COPY --from=builder /app /app
+# Ship the example configs so deploys can enable features (e.g. the Telegram
+# channel) by pointing OPENJARVIS_CONFIG at one of them. See
+# deploy/render-telegram.yaml and docs/deployment/telegram-cloud.md.
+COPY configs/ /app/configs/
 WORKDIR /app
 
 # Run as an unprivileged user — the server needs no root privileges, so dropping

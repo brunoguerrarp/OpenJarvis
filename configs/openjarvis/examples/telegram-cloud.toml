@@ -1,0 +1,52 @@
+# Telegram Cloud — talk to OpenJarvis from your phone via a Telegram bot
+# Copy to ~/.openjarvis/config.toml, or point OPENJARVIS_CONFIG at this file.
+#
+# This preset turns OpenJarvis into a Telegram bot you can message from the
+# Telegram app on Android/iOS. The "brain" (this server + a cloud model) runs
+# on a machine that stays online — your PC or a cloud host — and you chat with
+# it from anywhere.
+#
+# Secrets do NOT go in this file. Provide them via environment variables so the
+# file is safe to commit:
+#   TELEGRAM_BOT_TOKEN   — the token @BotFather gives you (required)
+#   OPENAI_API_KEY       — the cloud model key for the "cloud" engine (required)
+#
+# Usage (local test):
+#   export TELEGRAM_BOT_TOKEN="123456:ABC..."
+#   export OPENAI_API_KEY="sk-..."
+#   OPENJARVIS_CONFIG=configs/openjarvis/examples/telegram-cloud.toml \
+#     jarvis serve --host 0.0.0.0 --port 8000
+# Then message your bot from the Telegram app. See docs/deployment/telegram-cloud.md
+# for the full cloud deploy walkthrough (Render).
+
+[engine]
+default = "cloud"                    # LiteLLM/OpenAI-backed; no local GPU needed
+
+[intelligence]
+default_model = "gpt-4o-mini"        # Cheap, fast cloud model. Swap as you like.
+provider = "cloud"
+
+[agent]
+default_agent = "simple"             # Single-turn chat. Use "orchestrator" for tools.
+
+[channel]
+enabled = true
+default_channel = "telegram"
+default_agent = "simple"             # Agent that answers incoming Telegram messages
+
+[channel.telegram]
+# Leave bot_token EMPTY — the channel falls back to the TELEGRAM_BOT_TOKEN env var,
+# so the real secret never lands in this committed file.
+bot_token = ""
+# Lock the bot to your own chat so strangers who find it cannot use your model/API
+# budget. Message @userinfobot on Telegram to get your numeric ID, then put it
+# here (comma-separated for several). This is not a secret, so it is fine in the
+# committed file. Leave empty to allow anyone who finds the bot — not recommended.
+allowed_chat_ids = ""
+parse_mode = "Markdown"
+
+[server]
+# 0.0.0.0 so a cloud host can reach it. A non-loopback bind REQUIRES an API key —
+# set OPENJARVIS_API_KEY in the environment (the server refuses to start without it).
+host = "0.0.0.0"
+port = 8000

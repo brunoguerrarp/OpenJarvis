@@ -1,0 +1,57 @@
+# Render Blueprint — OpenJarvis as an always-on Telegram bot.
+#
+# This turns OpenJarvis into a personal assistant you message from the Telegram
+# app on your Android/iOS phone. The server runs here in the cloud (reachable
+# 24/7, no need to keep your PC on) and answers your Telegram messages with a
+# cloud model.
+#
+# Apply at: https://dashboard.render.com/blueprint/new
+#   (point it at your fork/clone of this repo, then set the secrets below.)
+#
+# WHY NOT THE FREE PLAN: Telegram delivery here uses long polling, so the
+# process must stay alive continuously. Render's free web service spins down
+# after ~15 min idle, which stops the poller and makes the bot unresponsive
+# until a web request wakes it. This blueprint therefore uses the always-on
+# "starter" plan. If you want free, run the backend on your own always-on
+# machine instead (see docs/deployment/telegram-cloud.md).
+services:
+  - type: web
+    name: openjarvis-telegram
+    runtime: docker
+    plan: starter                 # Always-on. Free spins down and breaks polling.
+    region: oregon
+    dockerfilePath: ./deploy/docker/Dockerfile
+    dockerContext: .
+    # Enable the cloud engine + a model it can serve (CLI flags override config).
+    # The channel itself is switched on by the config file in OPENJARVIS_CONFIG.
+    dockerCommand: serve --host 0.0.0.0 --port 10000 --engine cloud --model gpt-4o-mini
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # Load the committed Telegram preset (baked into the image at /app/configs).
+      # This is what flips [channel] enabled = true and selects telegram.
+      - key: OPENJARVIS_CONFIG
+        value: /app/configs/openjarvis/examples/telegram-cloud.toml
+
+      # Your bot token from @BotFather on Telegram. Required. Secret —
+      # set it in the Render dashboard, never commit it.
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+
+      # Cloud model key for the "cloud" engine. Required. Secret.
+      - key: OPENAI_API_KEY
+        sync: false
+
+      # The server refuses a non-loopback bind without an API key. Generated.
+      - key: OPENJARVIS_API_KEY
+        generateValue: true
+
+      # Render's public port. Must match the --port above (Docker does not
+      # interpolate $PORT into the command).
+      - key: PORT
+        value: "10000"
+
+      # State dir. Free/Starter filesystems are ephemeral — fine for a stateless
+      # chat bot; see docs/deployment/render.md before storing durable state.
+      - key: OPENJARVIS_HOME
+        value: /home/openjarvis/.openjarvis
