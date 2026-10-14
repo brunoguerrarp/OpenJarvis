@@ -8,17 +8,18 @@
 # Apply at: https://dashboard.render.com/blueprint/new
 #   (point it at your fork/clone of this repo, then set the secrets below.)
 #
-# WHY NOT THE FREE PLAN: Telegram delivery here uses long polling, so the
-# process must stay alive continuously. Render's free web service spins down
-# after ~15 min idle, which stops the poller and makes the bot unresponsive
-# until a web request wakes it. This blueprint therefore uses the always-on
-# "starter" plan. If you want free, run the backend on your own always-on
-# machine instead (see docs/deployment/telegram-cloud.md).
+# PLAN NOTE: this blueprint is set to the FREE plan for testing. Telegram
+# delivery uses long polling, so the process must stay alive continuously —
+# and Render's free web service spins down after ~15 min idle, which stops the
+# poller and makes the bot go quiet until the next deploy/restart wakes it.
+# That is fine to validate the setup. For a bot that answers 24/7, switch
+# `plan: free` to `plan: starter` (always-on), or run the backend on your own
+# always-on machine instead (see docs/deployment/telegram-cloud.md).
 services:
   - type: web
     name: openjarvis-telegram
     runtime: docker
-    plan: starter                 # Always-on. Free spins down and breaks polling.
+    plan: free                    # Testing. Spins down when idle; see PLAN NOTE above.
     region: oregon
     dockerfilePath: ./deploy/docker/Dockerfile
     dockerContext: .
