@@ -42,7 +42,7 @@ bot_token = ""
 # budget. Message @userinfobot on Telegram to get your numeric ID, then put it
 # here (comma-separated for several). This is not a secret, so it is fine in the
 # committed file. Leave empty to allow anyone who finds the bot — not recommended.
-allowed_chat_ids = ""
+allowed_chat_ids = "8384515686"
 parse_mode = "Markdown"
 
 [server]
