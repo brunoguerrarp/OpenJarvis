@@ -25,8 +25,8 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
         sh -s -- -y --profile minimal --default-toolchain none && \
-    rustup toolchain install 1.88 --profile minimal && \
-    rustup default 1.88
+    rustup toolchain install 1.89 --profile minimal && \
+    rustup default 1.89
 
 WORKDIR /app
 
@@ -50,11 +50,6 @@ COPY deploy/windows deploy/windows
 
 # Copy built frontend into the server static directory
 COPY --from=frontend /src/openjarvis/server/static src/openjarvis/server/static/
-
-# Keep the Rust extension build within the memory ceiling of small cloud
-# builders (e.g. Render's free plan). Dropping debug info and serializing
-# codegen cuts peak RAM so the compile is not OOM-killed (exit 1 / SIGKILL).
-ENV RUSTFLAGS="-C debuginfo=0" CARGO_BUILD_JOBS=1
 
 # Install the project itself without re-resolving dependencies.
 RUN uv pip install --system --no-deps . && \
